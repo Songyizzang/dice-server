@@ -4,10 +4,10 @@ import pymysql
 import json
 
 
-host="dicerds.cn7oixdffz0i.ap-northeast-2.rds.amazonaws.com"
-username="root"
-pw="root1234"
-db="dicedb"
+host=#비밀
+username=#비밀
+pw=#비밀
+db=#비밀
 
 
 def lambda_handler(event, context):
@@ -21,9 +21,9 @@ def lambda_handler(event, context):
     
     
     #common 
-    sql = "SELECT product.product_id,isSale,common_brand,common_name,common_price,common_capacity,common_unit,common_displayType,common_category FROM product JOIN common ON product.product_id = common.product_id;"
+    query = "SELECT product.product_id,isSale,common_brand,common_name,common_price,common_capacity,common_unit,common_displayType,common_category FROM product JOIN common ON product.product_id = common.product_id;"
     key = "common"
-    curs.execute(sql)
+    curs.execute(query)
 
     result[key]=[]
 
@@ -44,8 +44,8 @@ def lambda_handler(event, context):
         tmp['common_category'] = row[8]
         
         if  row[1] is 1:
-            sql = "select sale_type,sale_eventtype,sale_percent,sale_startdate,sale_enddate FROM sale WHERE product_id="+ str(tmp['product_id'])
-            curs.execute(sql)
+            query = "select sale_type,sale_eventtype,sale_percent,sale_startdate,sale_enddate FROM sale WHERE product_id="+ str(tmp['product_id'])
+            curs.execute(query)
             row = curs.fetchone()
             t = dict()
             t['sale_type'] = row[0]
@@ -65,9 +65,9 @@ def lambda_handler(event, context):
 
 
     #beef 
-    sql = "SELECT product.product_id,isSale,beef_part,beef_pricePerUnitWeight,beef_origin,beef_usage,beef_identificationNum,beef_rate FROM product,beef WHERE product.product_id = beef.product_id"
+    query = "SELECT product.product_id,isSale,beef_part,beef_pricePerUnitWeight,beef_origin,beef_usage,beef_identificationNum,beef_rate FROM product,beef WHERE product.product_id = beef.product_id"
     key = "beef"
-    curs.execute(sql)
+    curs.execute(query)
 
     result[key]=[]
 
@@ -92,9 +92,9 @@ def lambda_handler(event, context):
         
         
     #wine
-    sql = "SELECT product.product_id,isSale,wine_brand,wine_name,wine_price,wine_capacity,wine_origin,wine_sugarContent,wine_frequency FROM product,wine WHERE product.product_id = wine.product_id;"
+    query = "SELECT product.product_id,isSale,wine_brand,wine_name,wine_price,wine_capacity,wine_origin,wine_sugarContent,wine_frequency FROM product,wine WHERE product.product_id = wine.product_id;"
     key = "wine"
-    curs.execute(sql)
+    curs.execute(query)
 
     result[key]=[]
 
