@@ -27,6 +27,7 @@ def lambda_handler(event, context):
     conn = pymysql.connect(host=host, user=username, password=pw, db=db,charset='utf8')
     cursor = conn.cursor()
     rst = 0
+    result = dict()
 
     if event['isSale'] is 1: #세일한다고 바꿀 때 
         sale = Sale(event['product_id'], event['saleType'], event['percent'], event['eventType'],event['startdate'], event['enddate'])
@@ -38,7 +39,10 @@ def lambda_handler(event, context):
 
         if rst1 is 1 and rst2 is 1:
             conn.commit()
-            rst = 2
+            result['isSuccess'] = 1 
+        else:
+            result['isSuccess'] = 0
+            
     
     if event['isSale'] is 0: #세일안한다고 바꿀 때 
         query2 = "UPDATE product SET isSale = 0 WHERE product_id= " + event['product_id']
@@ -46,7 +50,10 @@ def lambda_handler(event, context):
         
         if rst is 1:
             conn.commit()
-         
+            result['isSuccess'] = 1 
+        
+        else:
+            result['isSuccess'] = 0
     
     cursor.close()
     conn.close()
@@ -54,5 +61,5 @@ def lambda_handler(event, context):
     
     return {
         'statusCode': 200,
-        'body': json.dumps(rst)
+        'body': json.dumps(result)
     }

@@ -25,6 +25,9 @@ request body
 {"isSale":(int)0,
 "product_id":/* String 상품아이디 */ }
 
+response
+isSuccess :1 or 0
+
 
 changeCost.py
 request header 
