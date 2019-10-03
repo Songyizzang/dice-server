@@ -21,8 +21,9 @@ request body
 "enddate":/* Stirng format( 2019-09-15 03:46:10 )*/ }
 
 
-
-
+② 세일안한다 !!! -> isSale == 0
+{"isSale":(int)0,
+"product_id":/* String 상품아이디 */ }
 
 
 changeCost.py
