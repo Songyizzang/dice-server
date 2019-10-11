@@ -1,5 +1,5 @@
-### allproduct.py  
-============ 
+##### allproduct.py  
+- 
   
   필요 request 없음  
   
@@ -7,7 +7,7 @@
   
   
 ##### changeSale.py
-============  
+-  
   
 1. request header    
   
@@ -35,7 +35,8 @@
 
 
 
-### changeCost.py
+##### changeCost.py
+-
 request header 
   {x-api-key: /* lambda 함수 changeCost api 게이트 웨이 누르면 api key 뜹니다*/}
 request body 
