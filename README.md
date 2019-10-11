@@ -1,13 +1,11 @@
-##### allproduct.py  
-- 
+##### allproduct.py   
   
   필요 request 없음  
   
   
   
   
-##### changeSale.py
--  
+##### changeSale.py  
   
 1. request header    
   
@@ -23,7 +21,7 @@
     ⑥ "startdate" : *format( 2019-09-15 03:46:10 )*
     ⑦"enddate" : *format( 2019-09-15 03:46:10 )*
   
-  > ② 비세일으로 변경 -> isSale == 0
+  > 비세일으로 변경 -> isSale == 0
     **변수 2개 모두 타입 무관**  
       
     ① "isSale" : *0(고정값)*   
