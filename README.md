@@ -1,4 +1,5 @@
 ## allproduct.py   
+`url https://biw4gdguia.execute-api.ap-northeast-2.amazonaws.com/default/dice-allproduct `
   
   1. READ (모든 상품 정보 읽기)  
     + 필요 request 없음
@@ -94,12 +95,13 @@
 
     +  response body
         >{isSuccess :1 or 0}
-
+ㄴ
       
   
   
 ## changeSale.py  
-  
+`url https://43nmzzrgt9.execute-api.ap-northeast-2.amazonaws.com/default/saleFunction`
+
 1. request header    
   
     + request body     
