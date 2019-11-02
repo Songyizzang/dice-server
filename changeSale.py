@@ -1,4 +1,5 @@
 import json
+import boto3
 import sys
 import logging
 import pymysql
@@ -31,13 +32,13 @@ def lambda_handler(event, context):
     cursor = conn.cursor()
     
     result = dict()
-    
-
-    
     data = event.get('body')
     dicdata = dict(parse_qsl(urlsplit(data).path))
     
     tmp = dicdata
+    
+    
+    
     
     if dicdata.get('isSale') is '1': #세일한다고 바꿀 때 
         sale = Sale(dicdata.get('product_id'), dicdata.get('saleType'), dicdata.get('percent'), dicdata.get('eventType'),dicdata.get('startdate'), dicdata.get('enddate'))
@@ -50,18 +51,51 @@ def lambda_handler(event, context):
 
         if rst1 is 1 and rst2 is 1:
             conn.commit()
-            result['isSuccess'] = 1 
+            result['isSuccess'] = 1
+            
+            
+            #mqtt
+            display_query = "SELECT display_id from display where product_id = " + dicdata.get('product_id')
+            display_id = cursor.execute(display_query)
+            
+            client = boto3.client('iot-data', region_name='ap-northeast-2')
+            dic = dict()
+            dic['t'] = sale.saleType
+            dic['p'] = sale.percent
+            dic['et'] = sale.eventType
+            dic['d'] = sale.startdate + " ~ " + sale.enddate
+            
+            response = client.publish(
+                topic = "no" + str(display_id),
+                qos=1,
+                payload=json.dumps(dic,ensure_ascii=False)
+            )
+            
         else:
             result['isSuccess'] = 0
         
     if dicdata.get('isSale') is '0': #세일안한다고 바꿀 때 
-        query2 = "UPDATE product SET isSale = 0 WHERE product_id = " + dicdata.get('product_id')
-        rst = cursor.execute(query2)
+        update_query = "UPDATE product SET isSale = 0 WHERE product_id = " + dicdata.get('product_id')
+        rst = cursor.execute(update_query)
            
-        tmp = query2    
+            
         if rst is 1:
             conn.commit()
-            result['isSuccess'] = 1 
+            result['isSuccess'] = 1
+            
+            #mqtt
+            display_query = "SELECT display_id from display where product_id = " + dicdata.get('product_id')
+            display_id = cursor.execute(display_query)
+            
+            client = boto3.client('iot-data', region_name='ap-northeast-2')
+            dic = dict()
+            dic['isSale'] = '0'
+            
+            response = client.publish(
+                topic = "no" + str(display_id),
+                qos=1,
+                payload=json.dumps(dic,ensure_ascii=False)
+            )
         
         else:
             result['isSuccess'] = 0

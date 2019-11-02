@@ -1,3 +1,4 @@
+import boto3
 import sys
 import logging
 import pymysql
@@ -178,13 +179,14 @@ def lambda_handler(event, context):
                 
         else:
             result['isSuccess'] = 0
-      
+
+        
             
     elif httpmethod == "PUT":
         data = event.get('body')
         param = dict(parse_qsl(urlsplit(data).path))
         product_type = param.get('product_type')
-        
+        dic = dict()
         
         if product_type == 'common':
             query = "UPDATE common SET "
@@ -196,6 +198,13 @@ def lambda_handler(event, context):
             query += "common_displayType = \'" + param['common_displayType'] + "\', " 
             query += "common_category = \'" + param['common_category'] + "\' "    
             query += "where product_id=" + param['product_id']
+            
+            
+            dic['b'] = "[" + param['common_brand'] + "]"  
+            dic['u'] = param['common_name'] + " " + param['common_capacity'] + param['common_unit']
+            dic['p'] = param['common_price']
+            
+            
         
         
         elif product_type == 'beef':
@@ -209,6 +218,15 @@ def lambda_handler(event, context):
             query += "where product_id=" + param['product_id']
             
             
+            dic['p'] = param['beef_part']
+            dic['w'] = param['beef_pricePerUnitWeight']
+            dic['o'] = param['beef_origin']
+            dic['s'] = param['beef_usage']
+            dic['i'] = param['beef_identificationNum']
+            dic['r'] = param['beef_rate']
+            
+            
+            
         elif product_type == 'wine':
             query = "UPDATE wine SET "
             query += "wine_brand = \'" + param['wine_brand'] + "\', " 
@@ -219,6 +237,15 @@ def lambda_handler(event, context):
             query += "wine_sugarContent = " + param['wine_sugarContent'] + ", " 
             query += "wine_frequency  = " + param['wine_frequency'] + " "  
             query += "where product_id=" + param['product_id']
+            
+            
+            dic['b'] = param['wine_brand']
+            dic['n'] = param['wine_name']
+            dic['p'] = param['wine_price']
+            dic['c'] = param['wine_capacity']
+            dic['o'] = param['wine_origin']
+            dic['s'] = param['wine_sugarContent']
+            dic['f'] = param['wine_frequency']
         
         
         rst = 0
@@ -227,6 +254,20 @@ def lambda_handler(event, context):
         if rst == 1:
             result['isSuccess'] = 1
             conn.commit()
+            #mqtt
+            display_query = "SELECT display_id from display where product_id = " + param['product_id']
+            display_id = curs.execute(display_query)
+            
+            client = boto3.client('iot-data', region_name='ap-northeast-2')
+        
+            response = client.publish(
+                topic = "no" + str(display_id),
+                qos=1,
+                payload=json.dumps(dic,ensure_ascii=False)
+            )
+            
+            
+            
         else:
             result['isSuccess'] = 0
             
