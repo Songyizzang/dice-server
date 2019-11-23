@@ -3,14 +3,14 @@ import boto3
 import sys
 import logging
 import pymysql
-import ast
+#import ast
 from urllib.parse import urlsplit, parse_qsl
 
 
-host=
-username=
-pw=
-db=
+host="dicerds.cn7oixdffz0i.ap-northeast-2.rds.amazonaws.com"
+username="root"
+pw="root1234"
+db="dicedb"
 
 
 class Sale:
@@ -56,20 +56,32 @@ def lambda_handler(event, context):
             
             #mqtt
             display_query = "SELECT display_id from display where product_id = " + dicdata.get('product_id')
-            display_id = cursor.execute(display_query)
+            cursor.execute(display_query)
+            r = cursor.fetchone()
+            display_id = r[0]
             
             client = boto3.client('iot-data', region_name='ap-northeast-2')
             dic = dict()
             dic['t'] = sale.saleType
             dic['p'] = sale.percent
-            dic['et'] = sale.eventType
+            
+            if dicdata.get('eventType') == "percent":
+                dic['eventType'] = "per"
+                
+            else:
+                dic['eventType'] = sale.eventType
+            
             dic['d'] = sale.startdate + " ~ " + sale.enddate
+            
             
             response = client.publish(
                 topic = "no" + str(display_id),
                 qos=1,
                 payload=json.dumps(dic,ensure_ascii=False)
             )
+            
+            print('d어')
+            print(str(display_id))    
             
         else:
             result['isSuccess'] = 0
@@ -85,7 +97,9 @@ def lambda_handler(event, context):
             
             #mqtt
             display_query = "SELECT display_id from display where product_id = " + dicdata.get('product_id')
-            display_id = cursor.execute(display_query)
+            cursor.execute(display_query)
+            r = cursor.fetchone()
+            display_id = r[0]
             
             client = boto3.client('iot-data', region_name='ap-northeast-2')
             dic = dict()
@@ -109,3 +123,4 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps(result)
     }
+    

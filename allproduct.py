@@ -1,3 +1,4 @@
+import math
 import boto3
 import sys
 import logging
@@ -5,11 +6,10 @@ import pymysql
 import json
 from urllib.parse import urlsplit, parse_qsl
 
-
-host=
-username=
-pw=
-db=
+host="dicerds.cn7oixdffz0i.ap-northeast-2.rds.amazonaws.com"
+username="root"
+pw="root1234"
+db="dicedb"
 
 
 def lambda_handler(event, context):
@@ -199,14 +199,7 @@ def lambda_handler(event, context):
             query += "common_category = \'" + param['common_category'] + "\' "    
             query += "where product_id=" + param['product_id']
             
-            
-            dic['b'] = "[" + param['common_brand'] + "]"  
-            dic['u'] = param['common_name'] + " " + param['common_capacity'] + param['common_unit']
-            dic['p'] = param['common_price']
-            
-            
-        
-        
+
         elif product_type == 'beef':
             query = "UPDATE beef SET "
             query += "beef_part = \'" + param['beef_part'] + "\', "  
@@ -239,13 +232,7 @@ def lambda_handler(event, context):
             query += "where product_id=" + param['product_id']
             
             
-            dic['b'] = param['wine_brand']
-            dic['n'] = param['wine_name']
-            dic['p'] = param['wine_price']
-            dic['c'] = param['wine_capacity']
-            dic['o'] = param['wine_origin']
-            dic['s'] = param['wine_sugarContent']
-            dic['f'] = param['wine_frequency']
+            
         
         
         rst = 0
@@ -253,18 +240,40 @@ def lambda_handler(event, context):
         
         if rst == 1:
             result['isSuccess'] = 1
+            
             conn.commit()
             #mqtt
             display_query = "SELECT display_id from display where product_id = " + param['product_id']
-            display_id = curs.execute(display_query)
+            curs.execute(display_query)
+            r = curs.fetchone()
+            if r is not None:
+                display_id = r[0]
             
-            client = boto3.client('iot-data', region_name='ap-northeast-2')
+            
+            
+                if product_type == 'common':
+                    dic['bnc'] = "[" + param['common_brand'] + "] " + param['common_name'] + " " + param['common_capacity'] + param['common_unit']
+                    dic['price'] = param['common_price']
+                    dic['ca'] = param['common_capacity']
+                    
+                    if int(param['common_capacity']) < 100:
+                        tmp_unit = int(param['common_price']) / int(param['common_capacity']) * 10
+                        dic['unit'] = "10" + param['common_unit'] + " / "+ str(int(tmp_unit))
+
+                    else:
+                        tmp_unit = int(param['common_price']) / int(param['common_capacity']) * 100
+                        dic['unit'] = "100" + param['common_unit'] + " / "+ str(int(tmp_unit))
+                    
+                
+
+            
+                client = boto3.client('iot-data', region_name='ap-northeast-2')
         
-            response = client.publish(
-                topic = "no" + str(display_id),
-                qos=1,
-                payload=json.dumps(dic,ensure_ascii=False)
-            )
+                response = client.publish(
+                    topic = "no" + str(display_id),
+                    qos=1,
+                    payload=json.dumps(dic,ensure_ascii=False)
+                )
             
             
             
@@ -283,3 +292,5 @@ def lambda_handler(event, context):
         'statusCode':200,
         'body':json.dumps(result,ensure_ascii=False)
     }
+
+    
